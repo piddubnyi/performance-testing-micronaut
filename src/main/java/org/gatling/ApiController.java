@@ -1,16 +1,23 @@
 package org.gatling;
 
-import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-import io.reactivex.Single;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 @Controller("/")
 public class ApiController {
 
-    @Get(uri = "/hello/{name}", produces = MediaType.TEXT_PLAIN)
-    public Single<String> hello(String name) {
-        return Single.just("Hello " + name + "!");
-    }
+    @Get(uri = "/record/{data}")
+    public void hello(String data) {
+        try (Writer dataFileWriter = new BufferedWriter(new FileWriter("data.txt", true));) {
+            dataFileWriter.append(data);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
