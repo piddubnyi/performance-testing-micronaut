@@ -40,7 +40,7 @@ public class ApplicationPerformanceTest {
         for (int i = 0; i < threads; i++) {
             executorService.submit(this::sendEndlessRequests);
         }
-        Thread.sleep(TimeUnit.MINUTES.toMillis(10));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
     }
 
     private void sendEndlessRequests() {

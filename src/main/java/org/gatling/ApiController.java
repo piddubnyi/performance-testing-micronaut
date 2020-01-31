@@ -1,24 +1,41 @@
 package org.gatling;
 
+import com.mongodb.reactivestreams.client.MongoClients;
+import com.mongodb.reactivestreams.client.Success;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 @Controller("/")
 public class ApiController {
 
-    public static final String FILE_NAME = "data.txt";
-
     @Get(uri = "/record/{data}")
     public void record(String data) {
-        try (Writer dataFileWriter = new BufferedWriter(new FileWriter(FILE_NAME, true));) {
-            dataFileWriter.append(data).append("\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MongoClients.create("mongodb://localhost:27017")
+            .getDatabase("testDB")
+            .getCollection("documents", DataEntry.class)
+            .insertOne(new DataEntry(data))
+        .subscribe(new Subscriber<>() {
+            @Override
+            public void onSubscribe(Subscription s) {
+
+            }
+
+            @Override
+            public void onNext(Success success) {
+
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 }
