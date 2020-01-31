@@ -1,41 +1,26 @@
 package org.gatling;
 
-import com.mongodb.reactivestreams.client.MongoClients;
-import com.mongodb.reactivestreams.client.Success;
+import com.mongodb.reactivestreams.client.MongoClient;
+import com.mongodb.reactivestreams.client.MongoCollection;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+
+import javax.inject.Inject;
 
 @Controller("/")
 public class ApiController {
 
+    private final MongoCollection<DataEntry> collection;
+
+    @Inject
+    public ApiController(MongoClient client) {
+        collection = client.getDatabase("testDB")
+            .getCollection("documents", DataEntry.class);
+    }
+
+
     @Get(uri = "/record/{data}")
     public void record(String data) {
-        MongoClients.create("mongodb://localhost:27017")
-            .getDatabase("testDB")
-            .getCollection("documents", DataEntry.class)
-            .insertOne(new DataEntry(data))
-        .subscribe(new Subscriber<>() {
-            @Override
-            public void onSubscribe(Subscription s) {
-
-            }
-
-            @Override
-            public void onNext(Success success) {
-
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+        collection.insertOne(new DataEntry(data));
     }
 }
