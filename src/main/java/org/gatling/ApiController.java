@@ -1,41 +1,34 @@
 package org.gatling;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.reactivestreams.client.MongoClients;
-import com.mongodb.reactivestreams.client.Success;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import reactor.core.publisher.Mono;
 
 @Controller("/")
 public class ApiController {
 
     @Get(uri = "/record/{data}")
     public void record(String data) {
-        MongoClients.create("mongodb://localhost:27017")
-            .getDatabase("testDB")
-            .getCollection("documents", DataEntry.class)
-            .insertOne(new DataEntry(data))
-        .subscribe(new Subscriber<>() {
-            @Override
-            public void onSubscribe(Subscription s) {
-
-            }
-
-            @Override
-            public void onNext(Success success) {
-
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+        Mono.from(
+            MongoClients.create(
+                MongoClientSettings.builder()
+                    .applyConnectionString(new ConnectionString("mongodb://localhost:27017"))
+                    .codecRegistry(
+                        CodecRegistries.fromRegistries(
+                            MongoClientSettings.getDefaultCodecRegistry(),
+                            CodecRegistries.fromProviders(
+                                PojoCodecProvider.builder().automatic(true).build()
+                            )
+                        )
+                    ).build()
+            ).getDatabase("testDB")
+                .getCollection("documents", DataEntry.class)
+                .insertOne(new DataEntry(data))
+        ).block();
     }
 }

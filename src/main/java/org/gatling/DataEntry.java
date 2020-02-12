@@ -2,6 +2,7 @@ package org.gatling;
 
 import java.util.Objects;
 
+
 public class DataEntry {
 
     private final String data;
